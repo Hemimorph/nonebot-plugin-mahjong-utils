@@ -9,15 +9,11 @@ from mahjong_utils.models.wind import Wind
 from nonebot.internal.adapter import Event
 from mahjong_utils.models.tile import Tile, parse_tiles
 from mahjong_utils.hora import build_hora_from_shanten_result
-from ssttkkl_nonebot_utils.errors.errors import BadRequestError
-from ssttkkl_nonebot_utils.interceptor.handle_error import handle_error
-from ssttkkl_nonebot_utils.interceptor.with_handling_reaction import (
-    with_handling_reaction,
-)
 
 from ..config import conf
 from ..ac import sniffer_service
 from ..utils.executor import run_in_my_executor
+from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from ..mapper import send_hora, send_common_shanten_result
 from ..utils.parser import try_parse_wind, try_parse_extra_yaku
 

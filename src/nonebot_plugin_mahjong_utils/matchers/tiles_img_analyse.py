@@ -2,11 +2,6 @@ from io import BytesIO
 
 from nonebot import logger
 from mahjong_utils.models.tile import Tile
-from ssttkkl_nonebot_utils.errors.errors import BadRequestError
-from ssttkkl_nonebot_utils.interceptor.handle_error import handle_error
-from ssttkkl_nonebot_utils.interceptor.with_handling_reaction import (
-    with_handling_reaction,
-)
 from nonebot_plugin_alconna import (
     Args,
     Image,
@@ -22,6 +17,7 @@ from nonebot_plugin_mahjong_utils.utils.executor import run_in_my_executor
 from ..config import conf
 from .pairi import handle_pairi
 from ..ac import command_service
+from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 
 try:
     from mahjong_detector import detect_tiles

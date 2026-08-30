@@ -7,7 +7,7 @@ from tests.utils import create_obv11_bot, mock_obv11_message_event
 
 
 async def do_test_text_result(app: App, monkeypatch, message: str, expect: str):
-    from nonebot_plugin_saa import MessageFactory
+    from nonebot_plugin_alconna.uniseg import UniMessage
     from nonebot_plugin_mahjong_utils.config import conf
 
     conf.mahjong_utils_send_image = False
@@ -15,7 +15,7 @@ async def do_test_text_result(app: App, monkeypatch, message: str, expect: str):
     async def fake_send(*args, **kwargs):
         return []
 
-    monkeypatch.setattr(MessageFactory, "send", fake_send)
+    monkeypatch.setattr(UniMessage, "send", fake_send)
 
     async with app.test_api() as ctx:
         from nonebot_plugin_mahjong_utils.mapper import last_sent

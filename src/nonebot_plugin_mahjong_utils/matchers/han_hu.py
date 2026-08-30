@@ -2,8 +2,6 @@ import re
 
 from nonebot import on_regex, on_command
 from nonebot.params import CommandArg, RegexGroup
-from ssttkkl_nonebot_utils.errors.errors import BadRequestError
-from ssttkkl_nonebot_utils.interceptor.handle_error import handle_error
 from mahjong_utils.point_by_han_hu import (
     get_child_point_by_han_hu,
     get_parent_point_by_han_hu,
@@ -12,6 +10,7 @@ from mahjong_utils.point_by_han_hu import (
 from ..config import conf
 from ..mapper import send_point_by_han_hu
 from ..ac import command_service, sniffer_service
+from ..utils.interceptors import BadRequestError, handle_error
 
 han_hu_pattern = r"^([1-9][0-9]*)番([1-9][0-9]*)符$"
 

@@ -9,7 +9,7 @@ from tests.utils import create_obv11_bot, mock_obv11_message_event
 
 
 async def run_text_command(app: App, monkeypatch, message: str) -> str:
-    from nonebot_plugin_saa import MessageFactory
+    from nonebot_plugin_alconna.uniseg import UniMessage
     from nonebot_plugin_mahjong_utils.config import conf
     from nonebot_plugin_mahjong_utils.mapper import last_sent
 
@@ -19,7 +19,7 @@ async def run_text_command(app: App, monkeypatch, message: str) -> str:
     async def fake_send(*args, **kwargs):
         return []
 
-    monkeypatch.setattr(MessageFactory, "send", fake_send)
+    monkeypatch.setattr(UniMessage, "send", fake_send)
 
     async with app.test_api() as ctx:
         bot = create_obv11_bot(ctx)
@@ -27,6 +27,22 @@ async def run_text_command(app: App, monkeypatch, message: str) -> str:
         await handle_event(bot=bot, event=event)
 
     return last_sent["text"]
+
+
+@pytest.mark.asyncio
+async def test_pairi_without_arg_returns_help(app: App, monkeypatch):
+    from nonebot_plugin_mahjong_utils.matchers.tiles_analyse import PAIRI_HELP_TEXT
+
+    result = await run_text_command(app, monkeypatch, "/牌理")
+
+    assert result == PAIRI_HELP_TEXT
+
+
+@pytest.mark.asyncio
+async def test_invalid_pairi_command_returns_error(app: App, monkeypatch):
+    result = await run_text_command(app, monkeypatch, "/牌理 invalid")
+
+    assert result == "请输入正确的牌型"
 
 
 @pytest.mark.asyncio

@@ -2,15 +2,11 @@ import re
 
 from nonebot import on_command
 from nonebot.params import CommandArg
-from ssttkkl_nonebot_utils.errors.errors import BadRequestError
-from ssttkkl_nonebot_utils.interceptor.handle_error import handle_error
-from ssttkkl_nonebot_utils.interceptor.with_handling_reaction import (
-    with_handling_reaction,
-)
 
 from ..config import conf
 from ..ac import command_service
 from ..mapper import send_text
+from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from .pairi import pairi_pattern, handle_msg_for_pairi
 from .furo_pairi import furo_pairi_pattern, handle_msg_for_furo_pairi
 

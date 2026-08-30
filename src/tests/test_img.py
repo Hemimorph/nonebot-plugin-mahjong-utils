@@ -17,7 +17,7 @@ def strip_html(html: str) -> str:
 
 
 async def do_test_img_result(app: App, monkeypatch, message: str, expect_html_path: str):
-    from nonebot_plugin_saa import MessageFactory
+    from nonebot_plugin_alconna.uniseg import UniMessage
     from nonebot_plugin_mahjong_utils.config import conf
     from nonebot_plugin_mahjong_utils.mapper import htmlrender
 
@@ -30,7 +30,7 @@ async def do_test_img_result(app: App, monkeypatch, message: str, expect_html_pa
         return []
 
     monkeypatch.setattr(htmlrender, "html_to_pic", fake_html_to_pic)
-    monkeypatch.setattr(MessageFactory, "send", fake_send)
+    monkeypatch.setattr(UniMessage, "send", fake_send)
 
     async with app.test_api() as ctx:
         from nonebot_plugin_mahjong_utils.mapper.sent_store import last_sent

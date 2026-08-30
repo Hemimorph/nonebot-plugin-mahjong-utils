@@ -4,9 +4,9 @@ from typing import List, Optional
 from mahjong_utils.hora import Hora
 from mahjong_utils.models.furo import Furo
 from mahjong_utils.models.tile import Tile
-from nonebot_plugin_saa import Text, Image, MessageFactory
 from mahjong_utils.point_by_han_hu import ChildPoint, ParentPoint
 from mahjong_utils.shanten import CommonShantenResult, FuroChanceShantenResult
+from nonebot_plugin_alconna.uniseg import UniMessage
 
 from ..config import conf
 from .sent_store import last_sent
@@ -16,13 +16,13 @@ from .plaintext.point_by_han_hu import map_point_by_han_hu
 async def send_text(text: str):
     if conf.mahjong_utils_test:
         last_sent["text"] = text
-    await MessageFactory(Text(text)).send(reply=True)
+    await UniMessage.text(text).send(reply_to=True)
 
 
 async def _send_img(img: bytes):
     if conf.mahjong_utils_test:
         last_sent["img"] = img
-    await MessageFactory(Image(img)).send(reply=True)
+    await UniMessage.image(raw=img).send(reply_to=True)
 
 
 async def send_common_shanten_result(result: CommonShantenResult, tiles: List[Tile]):

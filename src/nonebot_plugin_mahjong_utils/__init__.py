@@ -9,8 +9,6 @@ nonebot-plugin-mahjong-utils
 from nonebot import require
 from nonebot.plugin import PluginMetadata, inherit_supported_adapters
 
-require("nonebot_plugin_saa")
-require("ssttkkl_nonebot_utils")
 require("nonebot_plugin_alconna")
 require("nonebot_plugin_access_control_api")
 
@@ -46,9 +44,7 @@ __plugin_meta__ = PluginMetadata(
     type="application",
     homepage="https://github.com/bot-ssttkkl/nonebot-plugin-mahjong-utils",
     config=Config,
-    supported_adapters=inherit_supported_adapters(
-        "nonebot_plugin_alconna", "nonebot_plugin_saa"
-    ),
+    supported_adapters=inherit_supported_adapters("nonebot_plugin_alconna"),
 )
 
 from . import matchers  # noqa
