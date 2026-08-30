@@ -19,19 +19,23 @@ _HONOR_TILES = {
     7: 0x1F004,  # Red dragon
 }
 _TILE_BACK = chr(0x1F02B)
+_TEXT_VARIATION_SELECTOR = "\uFE0E"
 
 
 def tile_unicode(tile: Tile) -> str:
     """Map a Japanese Mahjong tile to its Unicode Mahjong Tile symbol."""
     if tile.tile_type == TileType.Z:
-        return chr(_HONOR_TILES[tile.num])
+        symbol = chr(_HONOR_TILES[tile.num])
+        if tile.num == 7:
+            return symbol + _TEXT_VARIATION_SELECTOR
+        return symbol
 
     # The Unicode Mahjong Tiles block has no separate symbols for red fives.
     return chr(_SUITED_TILE_BASE[tile.tile_type] + tile.real_num - 1)
 
 
 def tiles_unicode(tiles: Iterable[Tile]) -> str:
-    return "".join(map(tile_unicode, tiles))
+    return "".join(tile_unicode(tile) for tile in tiles)
 
 
 def furo_unicode(furo: Furo) -> str:

@@ -33,12 +33,21 @@ def test_unicode_tile_mapping():
 
     from nonebot_plugin_mahjong_utils.mapper.plaintext.hand import (
         furo_unicode,
+        tile_unicode,
         tiles_unicode,
     )
 
-    all_tiles = tiles_unicode(parse_tiles("123456789m123456789p123456789s1234567z"))
-    assert all_tiles == ("🀇🀈🀉🀊🀋🀌🀍🀎🀏" "🀙🀚🀛🀜🀝🀞🀟🀠🀡" "🀐🀑🀒🀓🀔🀕🀖🀗🀘" "🀀🀁🀂🀃🀆🀅🀄")
-    assert all(0x1F000 <= ord(symbol) <= 0x1F02B for symbol in all_tiles)
+    tiles = parse_tiles("123456789m123456789p123456789s1234567z")
+    tile_symbols = [tile_unicode(tile) for tile in tiles]
+    all_tiles = tiles_unicode(tiles)
+    assert all_tiles == (
+        "🀇🀈🀉🀊🀋🀌🀍🀎🀏"
+        "🀙🀚🀛🀜🀝🀞🀟🀠🀡"
+        "🀐🀑🀒🀓🀔🀕🀖🀗🀘"
+        "🀀🀁🀂🀃🀆🀅\U0001F004\uFE0E"
+    )
+    assert all(0x1F000 <= ord(symbol[0]) <= 0x1F02B for symbol in tile_symbols)
+    assert tile_unicode(parse_tiles("7z")[0]) == "\U0001F004\uFE0E"
     assert tiles_unicode(parse_tiles("0m0p0s")) == "🀋🀝🀔"
     assert furo_unicode(Furo.parse("0990m")) == "🀫🀏🀏🀫"
 
