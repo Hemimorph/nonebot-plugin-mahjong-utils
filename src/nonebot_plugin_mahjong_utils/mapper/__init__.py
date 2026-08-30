@@ -13,7 +13,7 @@ from .sent_store import last_sent
 from .plaintext.point_by_han_hu import map_point_by_han_hu
 
 
-async def _send_text(text: str):
+async def send_text(text: str):
     if conf.mahjong_utils_test:
         last_sent["text"] = text
     await MessageFactory(Text(text)).send(reply=True)
@@ -36,7 +36,7 @@ async def send_common_shanten_result(result: CommonShantenResult, tiles: List[Ti
 
         with StringIO() as sio:
             map_common_shanten_result(sio, result, tiles)
-            await _send_text(sio.getvalue())
+            await send_text(sio.getvalue())
 
 
 async def send_furo_chance_shanten_result(
@@ -59,7 +59,7 @@ async def send_furo_chance_shanten_result(
 
         with StringIO() as sio:
             map_furo_chance_shanten_result(sio, result, tiles, chance_tile, tile_from)
-            await _send_text(sio.getvalue())
+            await send_text(sio.getvalue())
 
 
 async def send_hora(
@@ -75,7 +75,7 @@ async def send_hora(
 
         with StringIO() as sio:
             map_hora(sio, hora_ron, hora_tsumo, tiles, furo)
-            await _send_text(sio.getvalue())
+            await send_text(sio.getvalue())
 
 
 async def send_point_by_han_hu(
@@ -87,4 +87,4 @@ async def send_point_by_han_hu(
     with StringIO() as sio:
         sio.write(f"{han}番{hu}符\n")
         map_point_by_han_hu(sio, parent_point, child_point)
-        await _send_text(sio.getvalue())
+        await send_text(sio.getvalue())
