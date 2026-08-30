@@ -4,9 +4,9 @@ from mahjong_utils.models.furo import Furo
 from mahjong_utils.models.tile import Tile
 from mahjong_utils.hora import Hora, RegularHoraHandPattern
 
-from .hand import map_hand
 from .point_by_han_hu import get_ron_text, get_tsumo_text
 from .general import num_mapping, wind_mapping, yaku_mapping
+from .hand import map_hand, furo_unicode, tile_unicode, tiles_unicode
 
 
 def map_yakuman_text(io: TextIO, yakuman: int):
@@ -30,13 +30,15 @@ def map_hora_basic_info(io: TextIO, hora: Hora, tiles: List[Tile], furo: List[Fu
 
 def map_regular_hora_hand_pattern(io: TextIO, pattern: RegularHoraHandPattern):
     io.write("手牌拆解：\n")
-    io.write(f"  雀头：{pattern.jyantou}{pattern.jyantou}\n")
+    io.write(f"  雀头：{tile_unicode(pattern.jyantou) * 2}\n")
     if pattern.menzen_mentsu:
         io.write(
-            f"  面子：{' '.join(sorted(map(lambda x: str(x), pattern.menzen_mentsu)))}\n"
+            f"  面子：{' '.join(tiles_unicode(x.tiles) for x in sorted(pattern.menzen_mentsu, key=str))}\n"
         )
     if pattern.furo:
-        io.write(f"  副露：{' '.join(sorted(map(lambda x: str(x), pattern.furo)))}\n")
+        io.write(
+            f"  副露：{' '.join(furo_unicode(x) for x in sorted(pattern.furo, key=str))}\n"
+        )
 
 
 def map_han_hu(io: TextIO, hora: Hora):

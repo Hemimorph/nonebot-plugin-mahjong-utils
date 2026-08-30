@@ -10,6 +10,7 @@ from tests.utils import create_obv11_bot, mock_obv11_message_event
 
 async def run_text_command(app: App, monkeypatch, message: str) -> str:
     from nonebot_plugin_alconna.uniseg import UniMessage
+
     from nonebot_plugin_mahjong_utils.config import conf
     from nonebot_plugin_mahjong_utils.mapper import last_sent
 
@@ -50,7 +51,7 @@ async def test_pairi_alias_and_13_tile_state(app: App, monkeypatch):
     result = await run_text_command(app, monkeypatch, "/牌理 1112345678999p")
 
     assert "听牌" in result
-    assert "进张：123456789p" in result
+    assert "进张：🀙🀚🀛🀜🀝🀞🀟🀠🀡" in result
 
 
 @pytest.mark.asyncio
@@ -62,8 +63,17 @@ async def test_14_tile_last_tile_furo_dora_and_chinese_options(app: App, monkeyp
     )
 
     assert "dora3" in result
-    assert "0990m" in result
+    assert "🀫🀏🀏🀫" in result
     assert "立直" in result
+
+
+@pytest.mark.asyncio
+async def test_furo_chance_uses_unicode_tiles(app: App, monkeypatch):
+    result = await run_text_command(app, monkeypatch, "/牌理 335678m3457p<7m")
+
+    assert "上家打🀍" in result
+    assert "吃打" in result
+    assert "7m" not in result
 
 
 @pytest.mark.asyncio

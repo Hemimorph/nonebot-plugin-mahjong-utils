@@ -1,7 +1,7 @@
 from collections import defaultdict
 from typing import List, TextIO, Sequence, cast
 
-from mahjong_utils.models.tile import Tile, tiles_text
+from mahjong_utils.models.tile import Tile
 from mahjong_utils.shanten import (
     ShantenWithoutGot,
     CommonShantenResult,
@@ -9,17 +9,17 @@ from mahjong_utils.shanten import (
     FuroChanceShantenResult,
 )
 
-from .hand import map_hand
+from .hand import map_hand, tile_unicode, tiles_unicode
 
 
 def map_shanten_without_got(io: TextIO, shanten: ShantenWithoutGot):
     if shanten.shanten == 1:
         io.write(
-            f"进张：{tiles_text(sorted(shanten.advance))} ({shanten.advance_num}张，好型{shanten.good_shape_advance_num}张)"
+            f"进张：{tiles_unicode(sorted(shanten.advance))} ({shanten.advance_num}张，好型{shanten.good_shape_advance_num}张)"
         )
     else:
         io.write(
-            f"进张：{tiles_text(sorted(shanten.advance))} ({shanten.advance_num}张)"
+            f"进张：{tiles_unicode(sorted(shanten.advance))} ({shanten.advance_num}张)"
         )
 
     if shanten.good_shape_improvement:
@@ -38,7 +38,9 @@ def map_shanten_without_got(io: TextIO, shanten: ShantenWithoutGot):
         improvement.sort(key=lambda x: x[0])
 
         for i, (t, discard, advance_num) in enumerate(improvement):
-            io.write(f"{t}（打{'/'.join(map(str, discard))}，听{advance_num}张）")
+            io.write(
+                f"{tile_unicode(t)}（打{'/'.join(map(tile_unicode, discard))}，听{advance_num}张）"
+            )
             if i != len(improvement) - 1:
                 io.write("\n")
 
@@ -93,9 +95,9 @@ def map_common_shanten_result(
 
             for action, shanten_after_discard in ordered_shanten:
                 if action[0] == "discard":
-                    io.write(f"[打{action[1]}]  ")
+                    io.write(f"[打{tile_unicode(action[1])}]  ")
                 elif action[0] == "ankan":
-                    io.write(f"[暗杠{action[1]}]  ")
+                    io.write(f"[暗杠{tile_unicode(action[1])}]  ")
 
                 map_shanten_without_got(io, shanten_after_discard)
                 io.write("\n")
@@ -128,7 +130,7 @@ def map_furo_chance_shanten_result(
         io.write("对家打")
     elif tile_from == 3:
         io.write("上家打")
-    io.write(str(chance_tile))
+    io.write(tile_unicode(chance_tile))
     io.write("\n\n")
 
     grouped_shanten = defaultdict(dict)
@@ -183,9 +185,11 @@ def map_furo_chance_shanten_result(
             if action[0] == "pass":
                 io.write("[PASS]  ")
             elif action[0] == "chi":
-                io.write(f"[{action[1]}吃打{action[2]}]  ")
+                io.write(
+                    f"[{tiles_unicode((action[1].first, action[1].second))}吃打{tile_unicode(action[2])}]  "
+                )
             elif action[0] == "pon":
-                io.write(f"[碰打{action[1]}]  ")
+                io.write(f"[碰打{tile_unicode(action[1])}]  ")
             elif action[0] == "minkan":
                 io.write("[杠]  ")
 
