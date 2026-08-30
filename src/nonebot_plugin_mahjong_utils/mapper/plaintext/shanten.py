@@ -9,7 +9,7 @@ from mahjong_utils.shanten import (
     FuroChanceShantenResult,
 )
 
-from .hand import map_hand, tile_unicode, tiles_unicode
+from .hand import tile_unicode, tiles_unicode
 
 
 def map_shanten_without_got(io: TextIO, shanten: ShantenWithoutGot):
@@ -48,9 +48,6 @@ def map_shanten_without_got(io: TextIO, shanten: ShantenWithoutGot):
 def map_common_shanten_result(
     io: TextIO, result: CommonShantenResult, tiles: List[Tile]
 ):
-    map_hand(io, tiles)
-    io.write("\n\n")
-
     if not result.with_got:
         if result.shanten == -1:
             io.write("和牌\n")
@@ -123,7 +120,6 @@ def map_furo_chance_shanten_result(
     chance_tile: Tile,
     tile_from: int,
 ):
-    map_hand(io, tiles)
     if tile_from == 1:
         io.write("下家打")
     elif tile_from == 2:

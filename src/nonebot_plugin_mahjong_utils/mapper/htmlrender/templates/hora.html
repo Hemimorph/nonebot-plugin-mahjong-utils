@@ -69,6 +69,7 @@
     </div>
 </div>
 {% endif %}
+{% if show_tsumo %}
 <div class="panel">
     <div class="panel__title">
         <div class="panel__title__text">
@@ -131,6 +132,8 @@
         </div>
     </div>
 </div>
+{% endif %}
+{% if show_ron %}
 <div class="panel">
     <div class="panel__title">
         <div class="panel__title__text">
@@ -192,5 +195,13 @@
         </div>
     </div>
 </div>
+{% endif %}
+{% if not show_tsumo and not show_ron %}
+<div class="panel">
+    <div class="panel__body">
+        和牌，但是无役
+    </div>
+</div>
+{% endif %}
 </body>
 </html>

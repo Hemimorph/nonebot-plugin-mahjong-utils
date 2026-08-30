@@ -15,7 +15,12 @@ from ..ac import sniffer_service
 from ..utils.executor import run_in_my_executor
 from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from ..mapper import send_hora, send_common_shanten_result
-from ..utils.parser import try_parse_wind, try_parse_extra_yaku
+from ..utils.parser import (
+    RON_ONLY_EXTRA_YAKU,
+    TSUMO_ONLY_EXTRA_YAKU,
+    try_parse_extra_yaku,
+    try_parse_wind,
+)
 
 tiles_pattern = r"([0-9]+(m|p|s|z){1})+"
 furo_pattern = r"[0-9]+(m|p|s|z){1}"
@@ -92,6 +97,12 @@ async def handle_pairi(
     result = await run_in_my_executor(shanten, tiles, furo)
     if result.shanten == -1 and len(result.hand.furo) * 3 + len(tiles) == 14:
         # 分析和牌
+        extra_yaku = extra_yaku or set()
+        has_tsumo_only_yaku = bool(extra_yaku & TSUMO_ONLY_EXTRA_YAKU)
+        has_ron_only_yaku = bool(extra_yaku & RON_ONLY_EXTRA_YAKU)
+        if has_tsumo_only_yaku and has_ron_only_yaku:
+            raise BadRequestError("不能同时指定仅限自摸和仅限荣和的役种")
+
         hora_ron = await run_in_my_executor(
             build_hora_from_shanten_result,
             result,
@@ -100,7 +111,7 @@ async def handle_pairi(
             dora=dora,
             self_wind=self_wind,
             round_wind=round_wind,
-            extra_yaku=extra_yaku,
+            extra_yaku=extra_yaku - TSUMO_ONLY_EXTRA_YAKU,
         )
         hora_tsumo = await run_in_my_executor(
             build_hora_from_shanten_result,
@@ -110,9 +121,16 @@ async def handle_pairi(
             dora=dora,
             self_wind=self_wind,
             round_wind=round_wind,
-            extra_yaku=extra_yaku,
+            extra_yaku=extra_yaku - RON_ONLY_EXTRA_YAKU,
         )
-        await send_hora(hora_ron, hora_tsumo, tiles, furo)
+        await send_hora(
+            hora_ron,
+            hora_tsumo,
+            tiles,
+            furo,
+            allow_ron=not has_tsumo_only_yaku,
+            allow_tsumo=not has_ron_only_yaku,
+        )
     else:
         await send_common_shanten_result(result, tiles)
 

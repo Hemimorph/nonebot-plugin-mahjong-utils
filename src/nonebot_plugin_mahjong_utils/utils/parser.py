@@ -1,8 +1,18 @@
 from typing import Optional
 
-from mahjong_utils.yaku import Yaku
-from mahjong_utils.yaku.extra import *
 from mahjong_utils.models.wind import Wind
+from mahjong_utils.yaku import Yaku
+from mahjong_utils.yaku.extra import (
+    chankan,
+    chihou,
+    haitei,
+    houtei,
+    ippatsu,
+    richi,
+    rinshan,
+    tenhou,
+    w_richi,
+)
 
 
 def try_parse_wind(text: str) -> Optional[Wind]:
@@ -31,6 +41,9 @@ extra_yaku_reversed_mapping = {
     "天和": tenhou,
     "地和": chihou,
 }
+
+TSUMO_ONLY_EXTRA_YAKU = frozenset({rinshan, haitei, tenhou, chihou})
+RON_ONLY_EXTRA_YAKU = frozenset({chankan, houtei})
 
 
 def try_parse_extra_yaku(text: str) -> Optional[Yaku]:

@@ -63,18 +63,41 @@ async def send_furo_chance_shanten_result(
 
 
 async def send_hora(
-    hora_ron: Hora, hora_tsumo: Hora, tiles: List[Tile], furo: List[Furo]
+    hora_ron: Hora,
+    hora_tsumo: Hora,
+    tiles: List[Tile],
+    furo: List[Furo],
+    *,
+    allow_ron: bool = True,
+    allow_tsumo: bool = True,
 ):
     if conf.mahjong_utils_send_image:
         from .htmlrender import render_hora
 
-        await _send_img(await render_hora(hora_ron, hora_tsumo, tiles, furo))
+        await _send_img(
+            await render_hora(
+                hora_ron,
+                hora_tsumo,
+                tiles,
+                furo,
+                allow_ron=allow_ron,
+                allow_tsumo=allow_tsumo,
+            )
+        )
 
     else:
         from .plaintext.hora import map_hora
 
         with StringIO() as sio:
-            map_hora(sio, hora_ron, hora_tsumo, tiles, furo)
+            map_hora(
+                sio,
+                hora_ron,
+                hora_tsumo,
+                tiles,
+                furo,
+                allow_ron=allow_ron,
+                allow_tsumo=allow_tsumo,
+            )
             await send_text(sio.getvalue())
 
 

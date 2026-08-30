@@ -162,7 +162,13 @@ async def render_furo_chance_shanten_result(
 
 
 async def render_hora(
-    hora_ron: Hora, hora_tsumo: Hora, tiles: List[Tile], furo: List[Furo]
+    hora_ron: Hora,
+    hora_tsumo: Hora,
+    tiles: List[Tile],
+    furo: List[Furo],
+    *,
+    allow_ron: bool = True,
+    allow_tsumo: bool = True,
 ) -> bytes:
     templates = {
         "tiles": tiles,
@@ -171,6 +177,8 @@ async def render_hora(
         "pattern": hora_ron.pattern,
         "hora_ron": hora_ron,
         "hora_tsumo": hora_tsumo,
+        "show_ron": allow_ron and hora_ron.han > 0,
+        "show_tsumo": allow_tsumo and hora_tsumo.han > 0,
         "yaku_mapping": yaku_mapping,
         "get_ron_text": get_ron_text,
         "get_tsumo_text": get_tsumo_text,

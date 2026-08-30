@@ -50,6 +50,7 @@ async def test_invalid_pairi_command_returns_error(app: App, monkeypatch):
 async def test_pairi_alias_and_13_tile_state(app: App, monkeypatch):
     result = await run_text_command(app, monkeypatch, "/牌理 1112345678999p")
 
+    assert result.startswith("听牌：")
     assert "听牌" in result
     assert "进张：🀙🀚🀛🀜🀝🀞🀟🀠🀡" in result
 
@@ -62,16 +63,52 @@ async def test_14_tile_last_tile_furo_dora_and_chinese_options(app: App, monkeyp
         "/牌理 23445633p777s 0990m 立直 一发 dora3 自风东 场风南",
     )
 
-    assert "dora3" in result
+    assert result.startswith("手牌拆解：")
     assert "🀫🀏🀏🀫" in result
     assert "立直" in result
+
+
+@pytest.mark.asyncio
+async def test_hora_only_outputs_available_win_method(app: App, monkeypatch):
+    both_yaku_result = await run_text_command(
+        app, monkeypatch, "/牌理 11123456789999s"
+    )
+    assert "自摸时：" in both_yaku_result
+    assert "荣和时：" in both_yaku_result
+
+    no_yaku_result = await run_text_command(
+        app, monkeypatch, "/牌理 123456m789p22p 789s"
+    )
+    assert no_yaku_result.startswith("手牌拆解：")
+    assert no_yaku_result.endswith("\n和牌，但是无役\n")
+    assert "自摸时：" not in no_yaku_result
+    assert "荣和时：" not in no_yaku_result
+    assert "点" not in no_yaku_result
+
+    natural_tsumo_result = await run_text_command(
+        app, monkeypatch, "/牌理 123456m789p456s22p"
+    )
+    assert "自摸时：" in natural_tsumo_result
+    assert "荣和时：" not in natural_tsumo_result
+
+    tsumo_result = await run_text_command(
+        app, monkeypatch, "/牌理 11123456789999s 天和"
+    )
+    assert "自摸时：" in tsumo_result
+    assert "荣和时：" not in tsumo_result
+
+    ron_result = await run_text_command(
+        app, monkeypatch, "/牌理 11123456789999s 河底"
+    )
+    assert "荣和时：" in ron_result
+    assert "自摸时：" not in ron_result
 
 
 @pytest.mark.asyncio
 async def test_furo_chance_uses_unicode_tiles(app: App, monkeypatch):
     result = await run_text_command(app, monkeypatch, "/牌理 335678m3457p<7m")
 
-    assert "上家打🀍" in result
+    assert result.startswith("上家打🀍\n\n")
     assert "吃打" in result
     assert "7m" not in result
 
