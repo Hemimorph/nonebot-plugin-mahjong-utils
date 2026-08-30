@@ -32,3 +32,15 @@ def load_bot():
     from nonebot_plugin_mahjong_utils.config import conf
 
     conf.mahjong_utils_test = True
+
+    # Access control is an optional runtime implementation. If it happens to be
+    # installed in the test environment, keep these tests focused on Mahjong
+    # behavior instead of requiring its database migrations.
+    try:
+        from nonebot_plugin_access_control.service._impl.patcher import (
+            ServicePatcherImpl,
+        )
+
+        ServicePatcherImpl._matcher_service_mapping.clear()
+    except ImportError:
+        pass

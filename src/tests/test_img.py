@@ -16,10 +16,21 @@ def strip_html(html: str) -> str:
         return sio.getvalue()
 
 
-async def do_test_img_result(app: App, message: str, expect_html_path: str):
+async def do_test_img_result(app: App, monkeypatch, message: str, expect_html_path: str):
+    from nonebot_plugin_saa import MessageFactory
     from nonebot_plugin_mahjong_utils.config import conf
+    from nonebot_plugin_mahjong_utils.mapper import htmlrender
 
     conf.mahjong_utils_send_image = True
+
+    async def fake_html_to_pic(**kwargs):
+        return b"test-image"
+
+    async def fake_send(*args, **kwargs):
+        return []
+
+    monkeypatch.setattr(htmlrender, "html_to_pic", fake_html_to_pic)
+    monkeypatch.setattr(MessageFactory, "send", fake_send)
 
     async with app.test_api() as ctx:
         from nonebot_plugin_mahjong_utils.mapper.sent_store import last_sent
@@ -38,27 +49,30 @@ async def do_test_img_result(app: App, message: str, expect_html_path: str):
 
 
 @pytest.mark.asyncio
-async def test_hora_img(app: App):
+async def test_hora_img(app: App, monkeypatch):
     await do_test_img_result(
         app,
+        monkeypatch,
         "11123456789999s",
         str(Path(__file__).parent / "expect_html" / "hora_11123456789999s.html"),
     )
 
 
 @pytest.mark.asyncio
-async def test_shanten_with_got_img(app: App):
+async def test_shanten_with_got_img(app: App, monkeypatch):
     await do_test_img_result(
         app,
+        monkeypatch,
         "234567s12334p",
         str(Path(__file__).parent / "expect_html" / "shanten_234567s12334p.html"),
     )
 
 
 @pytest.mark.asyncio
-async def test_shanten_without_got_img(app: App):
+async def test_shanten_without_got_img(app: App, monkeypatch):
     await do_test_img_result(
         app,
+        monkeypatch,
         "234567s1234p",
         str(Path(__file__).parent / "expect_html" / "shanten_234567s1234p.html"),
     )

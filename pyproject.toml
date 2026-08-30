@@ -6,7 +6,7 @@ authors = [
     {name = "ssttkkl", email = "huang.wen.long@hotmail.com"},
 ]
 dependencies = [
-    "nonebot2<3.0.0,>=2.0.0",
+    "nonebot2<3.0.0,>=2.4.2",
     "mahjong-utils<1.0.0,>=0.7.4",
     "nonebot-plugin-htmlrender<1.0.0.0,>=0.2.0.3",
     "nonebot-plugin-send-anything-anywhere>=0.3.0",
@@ -14,7 +14,7 @@ dependencies = [
     "nonebot-plugin-alconna>=0.57.2",
     "nonebot-plugin-access-control-api>=1.2.1"
 ]
-requires-python = "<3.13,>=3.10"
+requires-python = ">=3.10"
 readme = {file = "README.MD", content-type = "text/markdown"}
 license = {text = "MIT"}
 
@@ -26,6 +26,7 @@ detect = ["mahjong-detector>=0.0.6"]
 
 [dependency-groups]
 dev = [
+    "mahjong-utils @ file:///${PROJECT_ROOT}/../mahjong-utils/python-lib",
     "nonebot2[fastapi]>=2.4.2",
     "pytest<9.0.0,>=8.3.3",
     "nonebug<1.0.0,>=0.3.7",
@@ -70,6 +71,9 @@ distribution = true
 
 [tool.pdm.build]
 includes = ["src/nonebot_plugin_mahjong_utils"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
 
 [tool.nonebot]
 adapters = [{name = "OneBot V11", module_name = "nonebot.adapters.onebot.v11"}]
