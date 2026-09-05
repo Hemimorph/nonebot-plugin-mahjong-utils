@@ -131,10 +131,6 @@ def test_format_sanma_instruction():
 async def test_start_game_command(monkeypatch, command, expected_mode_text):
     from nonebot_plugin_mahjong_utils.matchers import start_game
 
-    class CommandBody:
-        def extract_plain_text(self):
-            return command.removeprefix("/开局").strip()
-
     sent = []
 
     async def fake_send_text(text):
@@ -143,7 +139,7 @@ async def test_start_game_command(monkeypatch, command, expected_mode_text):
     monkeypatch.setattr(start_game, "roll_dice", lambda: (3, 4))
     monkeypatch.setattr(start_game, "send_text", fake_send_text)
 
-    await start_game.handle(CommandBody())
+    await start_game.handle_start_game(command.removeprefix("/开局").strip())
 
     assert "🎲 3 + 4 = 7" in sent[0]
     assert expected_mode_text in sent[0]

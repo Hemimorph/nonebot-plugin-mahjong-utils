@@ -2,28 +2,17 @@ from io import BytesIO
 
 from nonebot import logger
 from mahjong_utils.models.tile import Tile
-from nonebot_plugin_alconna import (
-    Args,
-    Image,
-    Match,
-    Alconna,
-    AlconnaMatch,
-    on_alconna,
-    image_fetch,
-)
 
 from nonebot_plugin_mahjong_utils.utils.executor import run_in_my_executor
 
-from ..config import conf
 from .pairi import handle_pairi
-from ..ac import command_service
-from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
+from ..utils.interceptors import BadRequestError
 
 try:
     from mahjong_detector import detect_tiles
 
     MAHJONG_DETECTOR_AVAILABLE = True
-except:
+except ImportError:
     MAHJONG_DETECTOR_AVAILABLE = False
 
 character_tile_mapping = {
@@ -36,30 +25,23 @@ character_tile_mapping = {
     "chun": "7z",
 }
 
-if MAHJONG_DETECTOR_AVAILABLE and conf.mahjong_utils_command_mode:
-    tiles_img_analyse_command_matcher = on_alconna(
-        Alconna("日麻手牌分析", Args["img", Image]),
-        aliases={"牌理"},
-        use_cmd_start=True,
-        priority=1,
-        block=True,
-    )
-    command_service.patch_matcher(tiles_img_analyse_command_matcher)
 
-    @tiles_img_analyse_command_matcher.handle()
-    @handle_error()
-    @with_handling_reaction()
-    async def _(img: Match[bytes] = AlconnaMatch("img", image_fetch)):
-        tiles = await run_in_my_executor(detect_tiles, BytesIO(img.result))
-        tiles = [character_tile_mapping.get(t, t) for t in tiles]
-        tiles = [Tile.by_text(t) for t in tiles]
+async def handle_image_for_pairi(image: bytes | None):
+    if not MAHJONG_DETECTOR_AVAILABLE:
+        raise BadRequestError("图片牌理需要安装 nonebot-plugin-mahjong-utils[detect]")
+    if not image:
+        raise BadRequestError("无法获取图片内容")
 
-        logger.debug(f"tiles detect result: {tiles}")
+    tiles = await run_in_my_executor(detect_tiles, BytesIO(image))
+    tiles = [character_tile_mapping.get(t, t) for t in tiles]
+    tiles = [Tile.by_text(t) for t in tiles]
 
-        if tiles:
-            try:
-                await handle_pairi(tiles, [])
-            except BadRequestError as e:
-                raise BadRequestError(f"{e.message}，从图片检测到的手牌为{tiles}")
-        else:
-            raise BadRequestError("未识别到麻将牌")
+    logger.debug(f"tiles detect result: {tiles}")
+
+    if not tiles:
+        raise BadRequestError("未识别到麻将牌")
+
+    try:
+        await handle_pairi(tiles, [])
+    except BadRequestError as e:
+        raise BadRequestError(f"{e.message}，从图片检测到的手牌为{tiles}") from e

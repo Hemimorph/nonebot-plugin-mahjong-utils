@@ -1,10 +1,18 @@
 import re
 
-from nonebot import on_regex, on_command
-from nonebot.params import CommandArg, RegexGroup
 from mahjong_utils.point_by_han_hu import (
     get_child_point_by_han_hu,
     get_parent_point_by_han_hu,
+)
+from nonebot_plugin_alconna import (
+    Args,
+    Match,
+    Alconna,
+    MultiVar,
+    AlcMatches,
+    CommandMeta,
+    AlconnaMatch,
+    on_alconna,
 )
 
 from ..config import conf
@@ -26,32 +34,47 @@ async def handle_msg_for_han_hu(han: int, hu: int):
 
 
 if conf.mahjong_utils_sniff_mode:
-    han_hu_sniffer_matcher = on_regex(han_hu_pattern)
+    han_hu_sniffer_matcher = on_alconna(
+        Alconna(
+            re.compile(han_hu_pattern),
+            meta=CommandMeta(hide=True),
+            namespace="nonebot_plugin_mahjong_utils.han_hu_sniffer",
+            separators="\0",
+        )
+    )
     sniffer_service.patch_matcher(han_hu_sniffer_matcher)
 
     @han_hu_sniffer_matcher.handle()
     @handle_error()
-    async def handle(matched_groups=RegexGroup()):
-        han, hu = matched_groups
-        han = int(han)
-        hu = int(hu)
-        await handle_msg_for_han_hu(han, hu)
+    async def handle(result: AlcMatches):
+        matched = result.header_match.result
+        await handle_msg_for_han_hu(int(matched.group(1)), int(matched.group(2)))
 
 
 if conf.mahjong_utils_command_mode:
-    han_hu_command_matcher = on_command("日麻番符算点", aliases={"番符"})
+    han_hu_command_matcher = on_alconna(
+        Alconna(
+            "日麻番符算点",
+            Args["parts", MultiVar(str, "*")],
+            meta=CommandMeta(
+                description="查询日麻番符点数",
+                usage="/日麻番符算点 <x>番<y>符",
+                example="/番符 3番40符",
+            ),
+        ),
+        aliases={"番符"},
+        use_cmd_start=True,
+        block=True,
+    )
     command_service.patch_matcher(han_hu_command_matcher)
 
     @han_hu_command_matcher.handle()
     @handle_error()
-    async def handle(cmd_body=CommandArg()):
-        cmd_body: str = cmd_body.extract_plain_text().strip()
+    async def handle(
+        parts: Match[tuple[str, ...]] = AlconnaMatch("parts"),
+    ):
+        matched = re.fullmatch(han_hu_pattern, " ".join(parts.result))
+        if matched is None:
+            raise BadRequestError("请输入正确的番符数目")
 
-        try:
-            han, hu = re.match(han_hu_pattern, cmd_body).groups()
-            han = int(han)
-            hu = int(hu)
-        except Exception as e:
-            raise BadRequestError("请输入正确的番符数目") from e
-
-        await handle_msg_for_han_hu(han, hu)
+        await handle_msg_for_han_hu(int(matched.group(1)), int(matched.group(2)))

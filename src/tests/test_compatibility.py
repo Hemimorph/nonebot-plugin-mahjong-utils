@@ -47,6 +47,42 @@ async def test_invalid_pairi_command_returns_error(app: App, monkeypatch):
 
 
 @pytest.mark.asyncio
+async def test_alconna_matchers_receive_command_arguments(app: App, monkeypatch):
+    from nonebot_plugin_alconna import AlconnaMatcher
+
+    from nonebot_plugin_mahjong_utils.matchers import han_hu, start_game, tiles_analyse
+
+    assert issubclass(tiles_analyse.tiles_analyse_command_matcher, AlconnaMatcher)
+    assert issubclass(han_hu.han_hu_command_matcher, AlconnaMatcher)
+    assert issubclass(start_game.start_game_matcher, AlconnaMatcher)
+
+    received = []
+
+    async def fake_pairi(text: str):
+        received.append(("pairi", text))
+
+    async def fake_han_hu(han: int, hu: int):
+        received.append(("han_hu", han, hu))
+
+    async def fake_start_game(mode: str):
+        received.append(("start_game", mode))
+
+    monkeypatch.setattr(tiles_analyse, "handle_msg_for_pairi", fake_pairi)
+    monkeypatch.setattr(han_hu, "handle_msg_for_han_hu", fake_han_hu)
+    monkeypatch.setattr(start_game, "handle_start_game", fake_start_game)
+
+    await run_text_command(app, monkeypatch, "/牌理 123m 自风东")
+    await run_text_command(app, monkeypatch, "/番符 3番40符")
+    await run_text_command(app, monkeypatch, "/开局 三麻")
+
+    assert received == [
+        ("pairi", "123m 自风东"),
+        ("han_hu", 3, 40),
+        ("start_game", "三麻"),
+    ]
+
+
+@pytest.mark.asyncio
 async def test_pairi_alias_and_13_tile_state(app: App, monkeypatch):
     result = await run_text_command(app, monkeypatch, "/牌理 1112345678999p")
 

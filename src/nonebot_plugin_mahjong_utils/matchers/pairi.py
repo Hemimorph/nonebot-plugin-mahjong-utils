@@ -1,25 +1,25 @@
 import re
 from typing import Optional
 
+from nonebot import logger
 from mahjong_utils.yaku import Yaku
-from nonebot import logger, on_regex
 from mahjong_utils.shanten import shanten
 from mahjong_utils.models.furo import Furo
 from mahjong_utils.models.wind import Wind
-from nonebot.internal.adapter import Event
 from mahjong_utils.models.tile import Tile, parse_tiles
 from mahjong_utils.hora import build_hora_from_shanten_result
+from nonebot_plugin_alconna import Alconna, AlcMatches, CommandMeta, on_alconna
 
 from ..config import conf
 from ..ac import sniffer_service
 from ..utils.executor import run_in_my_executor
-from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from ..mapper import send_hora, send_common_shanten_result
+from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from ..utils.parser import (
     RON_ONLY_EXTRA_YAKU,
     TSUMO_ONLY_EXTRA_YAKU,
-    try_parse_extra_yaku,
     try_parse_wind,
+    try_parse_extra_yaku,
 )
 
 tiles_pattern = r"([0-9]+(m|p|s|z){1})+"
@@ -135,15 +135,21 @@ async def handle_pairi(
         await send_common_shanten_result(result, tiles)
 
 
-tiles_sniffer = on_regex(pairi_pattern)
-sniffer_service.patch_matcher(tiles_sniffer)
-
-
 if conf.mahjong_utils_sniff_mode:
+    tiles_sniffer = on_alconna(
+        Alconna(
+            re.compile(pairi_pattern),
+            meta=CommandMeta(hide=True),
+            namespace="nonebot_plugin_mahjong_utils.tiles_sniffer",
+            # A separator which cannot occur in a normal message makes the
+            # regex command head consume and validate the whole plaintext.
+            separators="\0",
+        )
+    )
+    sniffer_service.patch_matcher(tiles_sniffer)
 
     @tiles_sniffer.handle()
     @handle_error(silently=True)
     @with_handling_reaction()
-    async def handle(event: Event):
-        text = event.get_plaintext().strip()
-        await handle_msg_for_pairi(text)
+    async def handle(result: AlcMatches):
+        await handle_msg_for_pairi(result.header_match.result.group(0))

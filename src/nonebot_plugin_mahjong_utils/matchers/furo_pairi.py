@@ -1,17 +1,18 @@
+import re
 from io import StringIO
 from typing import Sequence
 
-from nonebot import logger, on_regex
-from nonebot.internal.adapter import Event
+from nonebot import logger
 from mahjong_utils.shanten import furo_chance_shanten
 from mahjong_utils.models.tile import Tile, parse_tiles
+from nonebot_plugin_alconna import Alconna, AlcMatches, CommandMeta, on_alconna
 
 from ..config import conf
 from ..ac import sniffer_service
 from ..utils.executor import run_in_my_executor
-from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 from ..mapper import send_furo_chance_shanten_result
 from ..mapper.plaintext.shanten import map_furo_chance_shanten_result
+from ..utils.interceptors import BadRequestError, handle_error, with_handling_reaction
 
 tiles_pattern = r"([0-9]+(m|p|s|z){1})+"
 chance_tile_pattern = r"([0-9](m|p|s|z){1})"
@@ -54,12 +55,20 @@ async def handle_msg_for_furo_pairi(text: str):
 
 
 if conf.mahjong_utils_sniff_mode:
-    furo_judge_sniffer = on_regex(furo_pairi_pattern)
+    furo_judge_sniffer = on_alconna(
+        Alconna(
+            re.compile(furo_pairi_pattern),
+            meta=CommandMeta(hide=True),
+            namespace="nonebot_plugin_mahjong_utils.furo_sniffer",
+            # Keep the complete message in the command header so the regular
+            # expression can validate it, including any whitespace.
+            separators="\0",
+        )
+    )
     sniffer_service.patch_matcher(furo_judge_sniffer)
 
     @furo_judge_sniffer.handle()
     @handle_error(silently=True)
     @with_handling_reaction()
-    async def handle(event: Event):
-        text = event.get_plaintext().strip()
-        await handle_msg_for_furo_pairi(text)
+    async def handle(result: AlcMatches):
+        await handle_msg_for_furo_pairi(result.header_match.result.group(0))

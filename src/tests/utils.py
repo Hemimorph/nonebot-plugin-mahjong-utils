@@ -1,3 +1,4 @@
+from itertools import count
 from typing import TYPE_CHECKING
 
 from nonebug.mixin.call_api import ApiContext
@@ -5,6 +6,9 @@ from nonebug.mixin.call_api import ApiContext
 if TYPE_CHECKING:
     from nonebot.adapters.onebot.v11 import Bot as OB11Bot
     from nonebot.adapters.onebot.v11 import Message as OB11Message
+
+
+_MESSAGE_IDS = count(1234)
 
 
 def create_obv11_bot(ctx: ApiContext) -> "OB11Bot":
@@ -16,13 +20,15 @@ def create_obv11_bot(ctx: ApiContext) -> "OB11Bot":
 
 
 def mock_obv11_message_event(
-    message: "OB11Message", group: bool = False, message_id: int = 1234
+    message: "OB11Message", group: bool = False, message_id: int | None = None
 ):
     from nonebot.adapters.onebot.v11.event import Sender
     from nonebot.adapters.onebot.v11 import GroupMessageEvent as OB11GroupMessageEvent
     from nonebot.adapters.onebot.v11 import (
         PrivateMessageEvent as OB11PrivateMessageEvent,
     )
+
+    message_id = next(_MESSAGE_IDS) if message_id is None else message_id
 
     if not group:
         return OB11PrivateMessageEvent(

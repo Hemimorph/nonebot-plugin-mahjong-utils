@@ -1,8 +1,15 @@
 from typing import Literal
 from secrets import randbelow
 
-from nonebot import on_command
-from nonebot.params import CommandArg
+from nonebot_plugin_alconna import (
+    Args,
+    Match,
+    Alconna,
+    MultiVar,
+    CommandMeta,
+    AlconnaMatch,
+    on_alconna,
+)
 
 from ..config import conf
 from ..mapper import send_text
@@ -92,20 +99,36 @@ def format_sanma_instruction(d1: int, d2: int) -> str:
     )
 
 
+async def handle_start_game(mode_text: str):
+    mode = parse_game_mode(mode_text)
+    d1, d2 = roll_dice()
+    if mode == "yonma":
+        result = format_yonma_instruction(d1, d2)
+    else:
+        result = format_sanma_instruction(d1, d2)
+    await send_text(result)
+
+
 if conf.mahjong_utils_command_mode:
-    start_game_matcher = on_command(
-        "日麻开局",
+    start_game_matcher = on_alconna(
+        Alconna(
+            "日麻开局",
+            Args["mode", MultiVar(str, "*")],
+            meta=CommandMeta(
+                description="生成线下日麻开门与配牌说明",
+                usage="/日麻开局 [四麻|三麻]",
+                example="/开局 三麻",
+            ),
+        ),
         aliases={"开局", "摇骰开局"},
+        use_cmd_start=True,
+        block=True,
     )
     command_service.patch_matcher(start_game_matcher)
 
     @start_game_matcher.handle()
     @handle_error()
-    async def handle(cmd_body=CommandArg()):
-        mode = parse_game_mode(cmd_body.extract_plain_text())
-        d1, d2 = roll_dice()
-        if mode == "yonma":
-            result = format_yonma_instruction(d1, d2)
-        else:
-            result = format_sanma_instruction(d1, d2)
-        await send_text(result)
+    async def handle(
+        mode_arg: Match[tuple[str, ...]] = AlconnaMatch("mode"),
+    ):
+        await handle_start_game(" ".join(mode_arg.result))
