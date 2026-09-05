@@ -3,9 +3,8 @@ from io import BytesIO
 from nonebot import logger
 from mahjong_utils.models.tile import Tile
 
-from nonebot_plugin_mahjong_utils.utils.executor import run_in_my_executor
-
 from .pairi import handle_pairi
+from ..utils.executor import run_in_my_executor
 from ..utils.interceptors import BadRequestError
 
 try:

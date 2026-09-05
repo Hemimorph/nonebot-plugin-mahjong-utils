@@ -16,7 +16,7 @@ from nonebot_plugin_alconna import (
 )
 
 from ..config import conf
-from ..mapper import send_point_by_han_hu
+from ..mapper import send_text, send_point_by_han_hu
 from ..ac import command_service, sniffer_service
 from ..utils.interceptors import BadRequestError, handle_error
 
@@ -73,6 +73,10 @@ if conf.mahjong_utils_command_mode:
     async def handle(
         parts: Match[tuple[str, ...]] = AlconnaMatch("parts"),
     ):
+        if not parts.result:
+            await send_text(han_hu_command_matcher.command().get_help())
+            return
+
         matched = re.fullmatch(han_hu_pattern, " ".join(parts.result))
         if matched is None:
             raise BadRequestError("请输入正确的番符数目")
