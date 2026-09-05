@@ -17,6 +17,7 @@ from .config import Config, conf
 _tiles_analyse_usage = ""
 _tiles_analyse_example = ""
 _hanhu_usage = ""
+_start_game_usage = ""
 
 if conf.mahjong_utils_sniff_mode:
     _tiles_analyse_usage = "<手牌代码> [...附加选项]"
@@ -27,6 +28,14 @@ elif conf.mahjong_utils_command_mode:
     _tiles_analyse_example = "/日麻手牌分析 23445633p777s 0990m 立直 一发 dora3"
     _hanhu_usage = "/日麻番符算点 x番y符"
 
+if conf.mahjong_utils_command_mode:
+    _start_game_usage = """
+
+线下日麻开局：/日麻开局 [四麻|三麻]
+- 掷两枚骰子，给出手搓开门、配牌、王牌及宝牌指示牌位置；不填参数时默认四麻。
+- 也可使用 /开局 [四麻|三麻]。
+"""
+
 __usage__ = f"""
 手牌分析：{_tiles_analyse_usage}
 - 输入手牌代码，输出向听数（未摸牌状态）、牌理（已摸牌、未和牌状态）或和牌分析（已摸牌、已和牌状态）。
@@ -35,11 +44,12 @@ __usage__ = f"""
 
 番符点数查询：{_hanhu_usage}
 - 输入x番y符，输出亲家/子家的自摸/荣和得点
+{_start_game_usage}
 """.strip()
 
 __plugin_meta__ = PluginMetadata(
     name="麻将小工具",
-    description="手牌分析、番符点数查询、……",
+    description="手牌分析、番符点数查询、线下日麻开局助手、……",
     usage=__usage__,
     type="application",
     homepage="https://github.com/bot-ssttkkl/nonebot-plugin-mahjong-utils",
